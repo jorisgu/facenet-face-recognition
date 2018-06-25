@@ -12,7 +12,7 @@ from keras.layers.normalization import BatchNormalization
 from keras.layers.pooling import MaxPooling2D, AveragePooling2D
 import h5py
 import matplotlib.pyplot as plt
-
+from tqdm import tqdm
 
 _FLOATX = 'float32'
 
@@ -150,13 +150,13 @@ def load_weights():
     for n in fileNames:
         paths[n.replace('.csv', '')] = dirPath + '/' + n
 
-    for name in WEIGHTS:
+    for name in tqdm(WEIGHTS):
         if 'conv' in name:
             conv_w = genfromtxt(paths[name + '_w'], delimiter=',', dtype=None)
             conv_w = np.reshape(conv_w, conv_shape[name])
             conv_w = np.transpose(conv_w, (2, 3, 1, 0))
             conv_b = genfromtxt(paths[name + '_b'], delimiter=',', dtype=None)
-            weights_dict[name] = [conv_w, conv_b]     
+            weights_dict[name] = [conv_w, conv_b]
         elif 'bn' in name:
             bn_w = genfromtxt(paths[name + '_w'], delimiter=',', dtype=None)
             bn_b = genfromtxt(paths[name + '_b'], delimiter=',', dtype=None)
@@ -183,19 +183,19 @@ def load_dataset():
     test_set_y_orig = np.array(test_dataset["test_set_y"][:]) # your test set labels
 
     classes = np.array(test_dataset["list_classes"][:]) # the list of classes
-    
+
     train_set_y_orig = train_set_y_orig.reshape((1, train_set_y_orig.shape[0]))
     test_set_y_orig = test_set_y_orig.reshape((1, test_set_y_orig.shape[0]))
-    
+
     return train_set_x_orig, train_set_y_orig, test_set_x_orig, test_set_y_orig, classes
 
 def img_path_to_encoding(image_path, model):
     img1 = cv2.imread(image_path, 1)
     return img_to_encoding(img1, model)
-    
+
 
 def img_to_encoding(image, model):
-    image = cv2.resize(image, (96, 96)) 
+    image = cv2.resize(image, (96, 96))
     img = image[...,::-1]
     img = np.around(np.transpose(img, (2,0,1))/255.0, decimals=12)
     x_train = np.array([img])
